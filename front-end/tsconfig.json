@@ -9,10 +9,6 @@
     /* Bundler mode */
     "moduleResolution": "node",
     "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@types/*": ["../types/*"]
-    },
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -25,5 +21,6 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
+  "exclude": ["node_modules", "dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
