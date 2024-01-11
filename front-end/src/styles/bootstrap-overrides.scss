@@ -1,0 +1,15 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+$primary: $primary-color;
+$secondary: $secondary-color;
+$success: $accent-color-1;
+$info: $accent-color-2;
+$warning: darken($primary-color, 20%);
+$danger: darken($secondary-color, 20%);
+$light: $neutral-color;
+$dark: darken($primary-color, 30%);
+
+$font-family-sans-serif: $font-family-body;
+$font-family-serif: $font-family-headings;
+
+@import '../../node_modules/bootstrap/scss/bootstrap';
