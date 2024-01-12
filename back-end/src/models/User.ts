@@ -24,15 +24,17 @@ class User extends Model<UserAttributes> {
   declare lastLogin?: Date;
   declare isVerified: boolean;
 
+  declare getRole: (roleName: string) => Promise<Role | null>;
   declare addRole: (role: Role) => Promise<void>;
   declare getRoles: () => Promise<Role[]>;
+  declare addRoles: (roles: Role[]) => Promise<void>;
 
   public async validatePassword(passToCheck: string): Promise<boolean> {
     try {
       logger.info(`Validating password for user with ID: ${this.id}`);
       return await bcrypt.compare(passToCheck, this.password);
     } catch (err) {
-      throw new ServerError(err.message);
+      throw new ServerError("Error validating password");
     }
   }
 

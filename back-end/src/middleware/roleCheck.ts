@@ -1,12 +1,18 @@
 // ./middleware/roleCheck.ts
 
 import { Request, Response, NextFunction } from "express";
-import UserService from "../services/UserService";
-import TokenService from "../services/TokenService";
-import { Role } from "../models";
+import { TokenValidationService } from "../services/TokenService";
+import { Role, Token } from "../models";
 import logger from "./logger";
 import asyncErrorHandler from "./asyncErrorHandler";
 import { AuthorizationError } from "../errors";
+import { UserProfileService } from "../services/UserService";
+
+export enum TokenType {
+  Access = "access",
+  EmailVerification = "email-verification",
+  PasswordReset = "password-reset",
+}
 
 const requireRole = (requiredRole: string) => {
   return asyncErrorHandler(
@@ -18,16 +24,16 @@ const requireRole = (requiredRole: string) => {
         throw new AuthorizationError("Token not provided");
       }
 
-      const decodedTokenUserId = await TokenService._validateToken(
+      const decodedTokenUserId = await TokenValidationService._validateToken(
         token,
-        "access"
+        TokenType.Access
       );
 
       if (!decodedTokenUserId) {
         throw new AuthorizationError("Invalid token");
       }
 
-      const user = await UserService.getUserById(decodedTokenUserId);
+      const user = await UserProfileService.getUserById(decodedTokenUserId);
       const hasRequiredRole =
         (await user.getRoles())
           .map((role: Role) => role.name)

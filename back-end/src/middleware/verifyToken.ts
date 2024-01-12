@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import TokenService from "../services/TokenService";
+import { TokenUtilityService } from "../services/TokenService";
 import asyncErrorHandler from "./asyncErrorHandler";
 import logger from "./logger";
 import { AuthenticationError } from "../errors";
@@ -19,7 +19,9 @@ const verifyToken = asyncErrorHandler(
     logger.info(`Received token: ${token}`);
 
     try {
-      const decoded = (await TokenService._verifyJwt(token)) as AccessToken;
+      const decoded = (await TokenUtilityService._verifyJwt(
+        token
+      )) as AccessToken;
       logger.info(`Token verified for user: ${decoded.userId}`);
       req.accessToken = decoded;
       next();

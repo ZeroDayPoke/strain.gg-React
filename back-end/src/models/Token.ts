@@ -45,6 +45,7 @@ Token.init(
   },
   {
     sequelize: db,
+    modelName: "Token",
     tableName: "Tokens",
   }
 );

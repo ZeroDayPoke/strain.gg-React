@@ -7,24 +7,25 @@ interface DecodedToken {
   roles: string[];
 }
 
-interface RequestWithSession extends Request {
-  session: session.Session &
-    Partial<session.SessionData> & { userId?: number; roles?: string[] };
+interface RequestWithUserToken extends Request {
+  session: session.Session & {
+    userId: number;
+    roles: string[];
+  };
+  accessToken: DecodedToken;
 }
 
 /**
  * Stores essential user data (ID and roles) in the session.
  * @param req - The request object.
- * @param userData - The decoded token data containing the user ID and roles.
  */
 export function storeEssentialUserDataInSession(
-  req: RequestWithSession,
-  userData: DecodedToken
+  req: RequestWithUserToken
 ): void {
-  if (!userData || !req.session) {
+  if (!req.session.userId || !req.session) {
     throw new AuthorizationError("Failed to store user data in session");
   }
 
-  req.session.userId = userData.userId;
-  req.session.roles = userData.roles;
+  req.session.userId = req.accessToken.userId;
+  req.session.roles = req.accessToken.roles;
 }
