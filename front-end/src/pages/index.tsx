@@ -1,0 +1,9 @@
+export { default as About } from "./About";
+export { default as Account } from "./Account";
+export { default as Contact } from "./Contact";
+export { default as Home } from "./Home";
+export { default as LogIn } from "./Login";
+export { default as SignUp } from "./Signup";
+export { default as Logout } from "./Logout";
+export { default as Admin } from "./Admin";
+export { default as TestimonialsPage } from "./TestimonialsPage";
