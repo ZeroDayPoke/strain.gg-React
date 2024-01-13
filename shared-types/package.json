@@ -1,0 +1,17 @@
+{
+  "name": "@zerodaypoke/strange-types",
+  "version": "1.0.3",
+  "description": "shared types",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Chris Stamper",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@zerodaypoke/strange-types": "^1.0.2"
+  }
+}

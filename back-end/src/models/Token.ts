@@ -2,14 +2,7 @@
 
 import { DataTypes, Model } from "sequelize";
 import db from "../config/database";
-
-interface TokenAttributes {
-  id: number;
-  userId: number;
-  token: string;
-  type: string;
-  expiration: Date;
-}
+import { TokenAttributes } from "@zerodaypoke/strange-types";
 
 class Token extends Model<TokenAttributes> {
   declare id: number;

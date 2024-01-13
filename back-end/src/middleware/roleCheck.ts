@@ -1,22 +1,24 @@
 // ./middleware/roleCheck.ts
 
-import { Request, Response, NextFunction } from "express";
 import { TokenValidationService } from "../services/TokenService";
 import { Role, Token } from "../models";
 import logger from "./logger";
 import asyncErrorHandler from "./asyncErrorHandler";
 import { AuthorizationError } from "../errors";
 import { UserProfileService } from "../services/UserService";
+import { TokenType } from "@zerodaypoke/strange-types";
+import {
+  MiddlewareFunctionWithTokenAndSession,
+  RequestWithTokenAndSession,
+} from "@zerodaypoke/strange-types";
 
-export enum TokenType {
-  Access = "access",
-  EmailVerification = "email-verification",
-  PasswordReset = "password-reset",
-}
+type RoleCheckHigherOrderFunction = (
+  requiredRole: string
+) => MiddlewareFunctionWithTokenAndSession;
 
-const requireRole = (requiredRole: string) => {
-  return asyncErrorHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+const requireRole: RoleCheckHigherOrderFunction = (requiredRole) => {
+  return asyncErrorHandler<RequestWithTokenAndSession>(
+    async (req, res, next) => {
       logger.info(`Role Required: ${requiredRole}`);
       const token = req.headers.authorization?.split(" ")[1];
 

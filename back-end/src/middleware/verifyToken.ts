@@ -1,41 +1,34 @@
-import { Request, Response, NextFunction } from "express";
+// src/middleware/verifyToken.ts
 import { TokenUtilityService } from "../services/TokenService";
 import asyncErrorHandler from "./asyncErrorHandler";
 import logger from "./logger";
 import { AuthenticationError } from "../errors";
+import {
+  MiddlewareFunctionWithToken,
+  RequestWithDecodedToken,
+} from "@zerodaypoke/strange-types";
 
-interface AccessToken {
-  userId: number;
-  roles: string[];
-}
-
-interface RequestWithUserToken extends Request {
-  accessToken?: AccessToken;
-}
-
-const verifyToken = asyncErrorHandler(
-  async (req: RequestWithUserToken, res: Response, next: NextFunction) => {
+const verifyToken: MiddlewareFunctionWithToken =
+  asyncErrorHandler<RequestWithDecodedToken>(async (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
+    req.token = token;
     logger.info(`Received token: ${token}`);
 
     try {
-      const decoded = (await TokenUtilityService._verifyJwt(
-        token
-      )) as AccessToken;
+      const decoded = await TokenUtilityService._verifyJwt(token);
       logger.info(`Token verified for user: ${decoded.userId}`);
-      req.accessToken = decoded;
+      req.decodedToken = decoded;
       next();
     } catch (error) {
       logger.error(`Token verification failed: ${error.message}`);
       if (req.session) {
-        await req.session.destroy((err) => {
+        req.session.destroy((err) => {
           if (err) logger.error(`Session destruction error: ${err}`);
           else logger.info("Session destroyed");
         });
       }
       throw new AuthenticationError("Invalid token");
     }
-  }
-);
+  });
 
 export default verifyToken;

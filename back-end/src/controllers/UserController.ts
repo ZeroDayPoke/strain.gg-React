@@ -14,67 +14,10 @@ import logger from "../middleware/logger";
 import { ServerError, ValidationError, AuthenticationError } from "../errors";
 import { Request, Response, NextFunction } from "express";
 import { validateUser } from "../validation";
-import session from "express-session";
-
-export interface DecodedToken {
-  userId: number;
-  roles: string[];
-}
-
-export interface UserSessionData {
-  userId: number;
-  roles: string[];
-}
-
-declare module "express-session" {
-  interface Session {
-    data: UserSessionData;
-  }
-}
-
-export interface RequestWithDecodedToken extends Request {
-  token: string;
-  decodedToken: DecodedToken;
-}
-
-export interface RequestWithSessionData extends Request {
-  session: session.Session & Partial<{ data: UserSessionData }>;
-}
-
-export interface RequestWithTokenAndSession extends Request {
-  token: string;
-  decodedToken: DecodedToken;
-  session: session.Session & Partial<{ data: UserSessionData }>;
-}
-
-export type MiddlewareFunctionWithToken = (
-  req: RequestWithDecodedToken,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
-export type MiddlewareFunctionWithSession = (
-  req: RequestWithSessionData,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
-export type MiddlewareFunctionWithTokenAndSession = (
-  req: RequestWithTokenAndSession,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
-
-type AsyncMiddlewareFunction<T extends Request> = (
-  req: T,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
-
-interface UserResponse {
-  message: string;
-  userId: number;
-  token: string;
-  roles?: string[];
-}
+import {
+  RequestWithTokenAndSession,
+  UserResponse,
+} from "@zerodaypoke/strange-types";
 
 const UserController = {
   signUp: async (req: Request, res: Response<UserResponse>): Promise<void> => {

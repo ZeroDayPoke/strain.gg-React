@@ -16,6 +16,14 @@ const errorHandler: ErrorRequestHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  logger.error(`${err.name}: ${err.message}`, {
+    path: req.path,
+    method: req.method,
+    stack: err.stack,
+    body: req.body,
+    query: req.query,
+  });
+
   if (
     err instanceof ValidationError ||
     err instanceof NotFoundError ||
@@ -23,19 +31,14 @@ const errorHandler: ErrorRequestHandler = (
     err instanceof AuthenticationError ||
     err instanceof ServerError
   ) {
-    logger.error(`${err.name}: ${err.message}`, {
-      path: req.path,
-      body: req.body,
-      query: req.query,
-    });
     return res.status(err.statusCode).json(err.serializeError());
   } else {
-    logger.error(`Unknown Error: ${err.message}`, {
-      path: req.path,
-      body: req.body,
-      query: req.query,
+    // Handle unknown errors
+    res.status(500).json({
+      message: "Internal Server Error",
+      statusCode: 500,
+      name: "UnknownError",
     });
-    res.status(500).json({ message: "Internal Server Error", statusCode: 500 });
   }
 };
 

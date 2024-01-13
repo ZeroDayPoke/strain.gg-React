@@ -1,19 +1,12 @@
+// src/models/User.ts
+
 import { Model, DataTypes } from "sequelize";
 import bcrypt from "bcrypt";
 import db from "../config/database";
 import Role from "./Role";
 import logger from "../middleware/logger";
 import { ServerError } from "../errors";
-
-export interface UserAttributes {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-  lastLogin?: Date;
-  isVerified: boolean;
-}
+import { UserAttributes } from "@zerodaypoke/strange-types";
 
 class User extends Model<UserAttributes> {
   declare id: number;

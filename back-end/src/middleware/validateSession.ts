@@ -1,45 +1,43 @@
-import { Request, Response, NextFunction } from "express";
+// src/middleware/validateSession.ts
 import asyncErrorHandler from "./asyncErrorHandler";
 import { AuthorizationError } from "../errors";
 import logger from "./logger";
-import session from "express-session";
-import { storeEssentialUserDataInSession } from "../utils/sessionUtils";
+import ENV from "../utils/loadEnv";
+import storeEssentialUserDataInSession from "../utils/sessionUtils";
+import {
+  RequestWithTokenAndSession,
+  MiddlewareFunctionWithTokenAndSession,
+} from "@zerodaypoke/strange-types";
 
-interface DecodedToken {
-  userId: number;
-  roles: string[];
-}
+const validateSession: MiddlewareFunctionWithTokenAndSession =
+  asyncErrorHandler<RequestWithTokenAndSession>(
+    async (req, res, next): Promise<void> => {
+      const accessToken = req.decodedToken;
+      logger.info("Validating user session for user ID", accessToken.userId);
 
-interface RequestWithUserToken extends Request {
-  session: session.Session & {
-    userId: number;
-    roles: string[];
-  };
-  accessToken: DecodedToken;
-}
+      if (!req.session.data.userId) {
+        if (ENV.NODE_ENV !== "production") {
+          logger.info("Non-production environment: Storing new session data.");
+          storeEssentialUserDataInSession(req);
+        } else {
+          logger.error("Production environment: Missing session userId.");
+          throw new AuthorizationError("Session userId is missing");
+        }
+      } else if (req.session.data.userId !== accessToken.userId) {
+        logger.error(
+          `Session and token user mismatch: Session UserId: ${req.session.data.userId}, Token UserId: ${accessToken.userId}`
+        );
+        req.session.destroy((err) => {
+          if (err) {
+            logger.error(`Error destroying session: ${err.message}`);
+          }
+        });
+        throw new AuthorizationError("Session and token user mismatch");
+      }
 
-const validateSession = asyncErrorHandler(
-  async (req: RequestWithUserToken, res: Response, next: NextFunction) => {
-    const accessToken = req.accessToken;
-    logger.info("Validating user", req.accessToken.userId);
-
-    if (!req.session.userId) {
-      // in production, this should redirect to login
-      logger.info("Session userId not found. Storing new session data.");
-      storeEssentialUserDataInSession(req);
-    } else if (req.session.userId != accessToken.userId) {
-      logger.error(
-        `Session and token user mismatch: ${req.session.userId} !== ${accessToken.userId}`
-      );
-      req.session.destroy((err) => {
-        if (err) logger.error(`Session destruction error: ${err.message}`);
-      });
-      throw new AuthorizationError("Session and token user mismatch");
+      logger.info(`Session validated for user: ${accessToken.userId}`);
+      next();
     }
-
-    logger.info(`Session validated for user: ${accessToken.userId}`);
-    next();
-  }
-);
+  );
 
 export default validateSession;

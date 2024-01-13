@@ -13,7 +13,7 @@ const checkAuthorizationHeader = asyncErrorHandler(
     if (!authHeader) {
       logger.info("Authorization header missing");
       if (req.session)
-        await req.session.destroy((session) =>
+        req.session.destroy((session) =>
           logger.info(`Session destroyed: ${session}`)
         );
       throw new AuthenticationError("Authorization header missing");
