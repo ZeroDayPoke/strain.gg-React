@@ -1,22 +1,18 @@
 // Type definitions for User
 
-interface User {
-  id?: number;
-  name?: string;
+export interface UserAttributes {
+  id: number;
+  name: string;
   email: string;
   password: string;
-  lastLogin?: Date | null;
   phone?: string;
-  isVerified?: boolean;
+  lastLogin?: Date;
+  isVerified: boolean;
 }
 
-type UserCredentials = Pick<User, "email" | "password">;
-
-interface UserResponse {
-  success?: boolean;
-  message?: string;
-  user?: User;
-  token?: string | null;
+export interface UserResponse {
+  message: string;
+  userId: number;
+  token: string;
+  roles?: string[];
 }
-
-export type { User, UserCredentials, UserResponse };

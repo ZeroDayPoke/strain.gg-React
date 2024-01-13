@@ -8,16 +8,6 @@ export enum TokenType {
   PasswordReset = "password-reset",
 }
 
-export interface UserAttributes {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-  lastLogin?: Date;
-  isVerified: boolean;
-}
-
 interface TokenAttributes {
   id: number;
   userId: number;
@@ -89,11 +79,4 @@ export interface NavBarItem {
 
 export interface NavBarProps {
   items: NavBarItem[];
-}
-
-interface UserResponse {
-  message: string;
-  userId: number;
-  token: string;
-  roles?: string[];
 }
