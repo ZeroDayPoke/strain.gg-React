@@ -5,7 +5,7 @@ import UserRepository from "../../repositories/UserRepository";
 import { TokenGenerationService } from "../TokenService";
 import UserProfileService from "./UserProfileService";
 import { User } from "../../models";
-import { NotFoundError, AuthenticationError, ServerError } from "../../errors";
+import { NotFoundError, AuthenticationError } from "../../errors";
 
 interface AuthenticateParams {
   email: string;
@@ -16,8 +16,8 @@ class UserAuthenticationService {
   async authenticate(
     params: AuthenticateParams
   ): Promise<{ user: User; accessToken: string }> {
+    logger.debug(`Authenticating user with email: ${params.email}`);
     try {
-      logger.info(`Authenticating user with email: ${params.email}`);
       const user = await UserRepository.findByEmail(params.email);
       if (!user) {
         throw new NotFoundError("User not found");
@@ -35,17 +35,17 @@ class UserAuthenticationService {
       logger.info(`Generated access token for user with ID: ${user.id}`);
       return { user, accessToken };
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async _generateUserAccessToken(user: User): Promise<string> {
-    logger.info(`Generating access token for user with ID: ${user.id}`);
+    logger.debug(`Generating access token for user with ID: ${user.id}`);
     try {
       const roles = await UserProfileService.getUserRoles(user.id);
       return TokenGenerationService.generateAccessToken(user.id, roles);
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 }

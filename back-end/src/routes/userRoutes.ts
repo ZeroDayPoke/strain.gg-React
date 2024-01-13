@@ -24,14 +24,14 @@ router.use(validateSession);
 router.use(ensureAuthenticated);
 
 // User Routes
-router.get("/verify", asyncErrorHandler(userController.verify));
+router.post("/verify", asyncErrorHandler(userController.verify));
 router.post(
   "/request-reset-password",
   asyncErrorHandler(userController.requestResetPassword)
 );
 
 router.post("/logout", asyncErrorHandler(userController.logOut));
-router.post("/checkSession", asyncErrorHandler(userController.verify));
+router.get("/checkSession", asyncErrorHandler(userController.checkSession));
 
 // Admin Routes
 router.use(requireRole("Admin"));

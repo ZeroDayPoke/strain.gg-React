@@ -7,6 +7,7 @@ import { ServerError } from "../../errors";
 import { _signJwt, _calculateExpiry } from "./TokenUtilityService";
 import ENV from "../../utils/loadEnv";
 import { TokenUtilityService } from ".";
+import { logger } from "../../middleware";
 
 export enum TokenType {
   Access = "access",
@@ -25,73 +26,126 @@ class TokenGenerationService {
     tokenType: TokenType,
     expiryTime: string
   ): Promise<Token> {
-    const token = crypto.randomBytes(20).toString("hex");
+    logger.debug(`Generating ${tokenType} token for user with ID: ${userId}`);
     try {
+      const token = crypto.randomBytes(20).toString("hex");
       return await TokenRepository.createToken({
         userId,
         token,
         type: tokenType,
         expiration: TokenUtilityService._calculateExpiry(expiryTime),
       });
-    } catch (e) {
-      throw new ServerError(`Failed to generate ${tokenType} token`);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  private static async manageExistingTokens(
+    userId: number,
+    tokenType: TokenType
+  ): Promise<Token | null> {
+    logger.debug(`Managing existing tokens for user with ID: ${userId}`);
+    try {
+      const existingTokens = await TokenRepository.getUserTokens(
+        userId,
+        tokenType
+      );
+      const validTokens = existingTokens.filter(
+        (token) => token.expiration >= new Date()
+      );
+
+      // Invalidate expired tokens
+      const expiredTokens = existingTokens.filter(
+        (token) => token.expiration < new Date()
+      );
+      await Promise.all(
+        expiredTokens.map((token) => TokenRepository.invalidateToken(token.id))
+      );
+
+      // Return a valid existing token if there's exactly one, otherwise null
+      return validTokens.length === 1 ? validTokens[0] : null;
+    } catch (err) {
+      throw err;
     }
   }
 
   static async generateEmailVerificationToken(userId: number): Promise<Token> {
-    return this._generateToken(
-      userId,
-      TokenType.EmailVerification,
-      ENV.EMAIL_VERIFICATION_TOKEN_EXPIRY
-    );
+    logger.debug("Generating email verification token");
+    try {
+      const existingToken = await this.manageExistingTokens(
+        userId,
+        TokenType.EmailVerification
+      );
+      if (existingToken) return existingToken;
+
+      const token = await TokenRepository.createToken({
+        userId,
+        token: TokenUtilityService._signJwt(
+          { userId },
+          ENV.EMAIL_VERIFICATION_TOKEN_EXPIRY
+        ),
+        type: TokenType.EmailVerification,
+        expiration: TokenUtilityService._calculateExpiry(
+          ENV.EMAIL_VERIFICATION_TOKEN_EXPIRY
+        ),
+      });
+      return token;
+    } catch (err) {
+      throw err;
+    }
   }
 
   static async generatePasswordResetToken(userId: number): Promise<Token> {
-    return this._generateToken(
-      userId,
-      TokenType.PasswordReset,
-      ENV.PASSWORD_RESET_TOKEN_EXPIRY
-    );
+    logger.debug(`Generating password reset token for user with ID: ${userId}`);
+    try {
+      const existingToken = await this.manageExistingTokens(
+        userId,
+        TokenType.PasswordReset
+      );
+      if (existingToken) return existingToken;
+
+      const token = await TokenRepository.createToken({
+        userId,
+        token: TokenUtilityService._signJwt(
+          { userId },
+          ENV.PASSWORD_RESET_TOKEN_EXPIRY
+        ),
+        type: TokenType.PasswordReset,
+        expiration: TokenUtilityService._calculateExpiry(
+          ENV.PASSWORD_RESET_TOKEN_EXPIRY
+        ),
+      });
+      return token;
+    } catch (err) {
+      throw err;
+    }
   }
 
   static async generateAccessToken(
     userId: number,
     roles: string[]
   ): Promise<string> {
+    logger.debug(`Generating access token for user with ID: ${userId}`);
     try {
-      const existingTokens = await TokenRepository.getUserTokens(
+      const existingToken = await this.manageExistingTokens(
         userId,
         TokenType.Access
       );
-
-      existingTokens.forEach(async (token) => {
-        if (token.expiration < new Date()) {
-          await TokenRepository.invalidateToken(token.id);
-        }
+      if (existingToken) return existingToken.token;
+      const token = await TokenRepository.createToken({
+        userId,
+        token: TokenUtilityService._signJwt(
+          { userId, roles },
+          ENV.ACCESS_TOKEN_EXPIRY
+        ),
+        type: TokenType.Access,
+        expiration: TokenUtilityService._calculateExpiry(
+          ENV.ACCESS_TOKEN_EXPIRY
+        ),
       });
-
-      if (existingTokens.length == 1) {
-        return existingTokens[0].token;
-      } else if (existingTokens.length > 1) {
-        existingTokens.forEach(async (token) => {
-          await TokenRepository.invalidateToken(token.id);
-        });
-      } else {
-        const token = await TokenRepository.createToken({
-          userId,
-          token: TokenUtilityService._signJwt(
-            { userId, roles },
-            ENV.ACCESS_TOKEN_EXPIRY
-          ),
-          type: TokenType.Access,
-          expiration: TokenUtilityService._calculateExpiry(
-            ENV.ACCESS_TOKEN_EXPIRY
-          ),
-        });
-        return token.token;
-      }
-    } catch (e) {
-      throw new ServerError("Failed to generate access token");
+      return token.token;
+    } catch (err) {
+      throw err;
     }
   }
 }

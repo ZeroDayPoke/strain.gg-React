@@ -21,11 +21,11 @@ interface MailOptions {
 
 class EmailService {
   static async sendEmail(mailOptions: MailOptions): Promise<void> {
+    logger.debug(`Sending email to ${mailOptions.to}`);
     try {
       const info = await transporter.sendMail(mailOptions);
       logger.info(`Email sent: ${info.response}`);
     } catch (error) {
-      logger.error(`Error sending email: ${error}`);
       throw error;
     }
   }
@@ -34,6 +34,7 @@ class EmailService {
     userEmail: string,
     token: string
   ): Promise<void> {
+    logger.debug(`Sending verification email to ${userEmail}`);
     const mailOptions: MailOptions = {
       from: ENV.EMAIL_USERNAME,
       to: userEmail,
@@ -44,7 +45,6 @@ class EmailService {
     try {
       await this.sendEmail(mailOptions);
     } catch (error) {
-      logger.error(`Error sending email: ${error}`);
       throw error;
     }
   }
@@ -53,6 +53,7 @@ class EmailService {
     userEmail: string,
     token: string
   ): Promise<void> {
+    logger.debug(`Sending reset password email to ${userEmail}`);
     const mailOptions: MailOptions = {
       from: ENV.EMAIL_USERNAME,
       to: userEmail,
@@ -62,7 +63,6 @@ class EmailService {
     try {
       await this.sendEmail(mailOptions);
     } catch (error) {
-      logger.error(`Error sending email: ${error}`);
       throw error;
     }
   }

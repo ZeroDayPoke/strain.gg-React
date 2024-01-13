@@ -1,7 +1,6 @@
 import { User, Role, Token } from "../models";
 import { Op } from "sequelize";
 import logger from "../middleware/logger";
-import { ServerError } from "../errors";
 
 interface CreateParams {
   name?: string;
@@ -13,7 +12,7 @@ interface CreateParams {
 
 class UserRepository {
   async createUser(userData: CreateParams): Promise<User> {
-    logger.info(`Creating user with params ${JSON.stringify(userData)}`);
+    logger.debug(`Creating user with params: ${JSON.stringify(userData)}`);
     try {
       const user = await User.create(userData);
       if (userData.Roles) {
@@ -21,23 +20,23 @@ class UserRepository {
       }
       return user;
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async findById(id: number): Promise<User | null> {
-    logger.info(`Finding user with id ${id}`);
+    logger.debug(`Fetching user by ID: ${id}`);
     try {
       return User.findOne({
         where: { id },
       });
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async findByToken(token: string, tokenType: string): Promise<User | null> {
-    logger.info(`Finding user by token ${token}`);
+    logger.debug(`Fetching user by token: ${token}`);
     try {
       const tokenRecord = await Token.findOne({
         where: {
@@ -51,22 +50,23 @@ class UserRepository {
 
       return this.findById(tokenRecord.userId);
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    logger.info(`Finding user by email ${email}`);
+    logger.debug(`Fetching user by email: ${email}`);
     try {
       return await User.findOne({
         where: { email },
       });
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async findAll(): Promise<User[]> {
+    logger.debug("Fetching all users");
     logger.warn("Fetching all users");
     logger.info("Fetching all users");
     try {
@@ -74,27 +74,27 @@ class UserRepository {
         attributes: ["id", "name", "email"],
       });
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async updateUserById(id: number, userData: any): Promise<void> {
-    logger.info(
+    logger.debug(
       `Updating user with id ${id} with params ${JSON.stringify(userData)}`
     );
     try {
       await User.update(userData, { where: { id } });
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async deleteUserById(id: number): Promise<void> {
-    logger.info(`Deleting user with id ${id}`);
+    logger.debug(`Deleting user with id ${id}`);
     try {
       await User.destroy({ where: { id } });
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 }

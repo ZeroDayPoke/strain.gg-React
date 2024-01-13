@@ -1,6 +1,7 @@
 // TokenValidationService.ts
 import TokenRepository from "../../repositories/TokenRepository";
-import { ServerError, ValidationError } from "../../errors";
+import { ValidationError } from "../../errors";
+import logger from "../../middleware/logger";
 import { _signJwt, _calculateExpiry } from "./TokenUtilityService";
 
 export enum TokenType {
@@ -16,6 +17,7 @@ export interface TokenPayload {
 
 class TokenValidationService {
   static async invalidateOnLogout(userId: number): Promise<void> {
+    logger.debug(`Invalidating tokens for user with ID: ${userId}`);
     try {
       const tokenData = await TokenRepository.getUserTokens(
         userId,
@@ -27,8 +29,8 @@ class TokenValidationService {
           await TokenRepository.invalidateToken(token.id);
         });
       }
-    } catch (e) {
-      throw new ServerError("Failed to invalidate token");
+    } catch (err) {
+      throw err;
     }
   }
 
@@ -36,6 +38,7 @@ class TokenValidationService {
     token: string,
     tokenType: TokenType
   ): Promise<number> {
+    logger.debug(`Validating ${tokenType} token`);
     try {
       const tokenData = await TokenRepository.findTokenByString({
         token: token,
@@ -48,8 +51,8 @@ class TokenValidationService {
       }
 
       return tokenData.userId;
-    } catch (e) {
-      throw new ValidationError("Invalid or expired token");
+    } catch (err) {
+      throw err;
     }
   }
 

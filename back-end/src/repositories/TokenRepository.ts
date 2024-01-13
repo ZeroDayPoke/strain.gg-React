@@ -2,7 +2,7 @@ import { Token } from "../models";
 import { Op } from "sequelize";
 import ms from "ms";
 import logger from "../middleware/logger";
-import { ServerError, ValidationError } from "../errors";
+import { ValidationError } from "../errors";
 
 export enum TokenType {
   Access = "access",
@@ -17,11 +17,11 @@ class TokenRepository {
     type: string;
     expiration: Date;
   }): Promise<Token> {
-    logger.info(`Creating token for user ${tokenData.userId}`);
+    logger.debug(`Creating token: ${tokenData.token}`);
     try {
       return await Token.create(tokenData);
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
@@ -34,19 +34,19 @@ class TokenRepository {
     type: TokenType;
     isValid?: boolean;
   }): Promise<Token | null> {
-    logger.info(`Finding token by string: ${token}`);
+    logger.debug(`Finding token: ${token}`);
     try {
       const condition = isValid ? { expiration: { [Op.gt]: new Date() } } : {};
       return await Token.findOne({
         where: { token, type, ...condition },
       });
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async invalidateToken(tokenId: number): Promise<void> {
-    logger.info(`Invalidating token with ID: ${tokenId}`);
+    logger.debug(`Invalidating token with ID: ${tokenId}`);
     try {
       const token = await Token.findByPk(tokenId);
       if (!token) {
@@ -55,24 +55,24 @@ class TokenRepository {
       await token.destroy();
       logger.info(`Token with ID: ${tokenId} has been invalidated.`);
     } catch (err) {
-      throw new ServerError(`Error invalidating token: ${err.message}`);
+      throw err;
     }
   }
 
   async getUserTokens(userId: number, type?: TokenType): Promise<Token[]> {
-    logger.info(`Fetching tokens for user: ${userId}`);
+    logger.debug(`Getting tokens for user with ID: ${userId}`);
     try {
       const whereConditions = type ? { userId, type } : { userId };
       return await Token.findAll({
         where: whereConditions,
       });
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
-  async refreshToken(token: string, newExpiryTime: string): Promise<Token> {
-    logger.info(`Refreshing token: ${token}`);
+  async refreshToken(token: string, newExpiryTime: string): Promise<string> {
+    logger.debug(`Refreshing token: ${token}`);
     try {
       const existingToken = await this.findTokenByString({
         token: token,
@@ -88,9 +88,9 @@ class TokenRepository {
       existingToken.expiration = newExpiration;
       await existingToken.save();
 
-      return existingToken;
+      return existingToken.token;
     } catch (err) {
-      throw new ServerError(`Failed to refresh token: ${err.message}`);
+      throw err;
     }
   }
 

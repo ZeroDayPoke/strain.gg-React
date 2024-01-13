@@ -1,5 +1,6 @@
 // UserProfileService.ts
 import UserRepository from "../../repositories/UserRepository";
+import { hashPassword } from "./UserUtilityService";
 import { User } from "../../models/index";
 import logger from "../../middleware/logger";
 import {
@@ -19,7 +20,7 @@ interface CreateUserParams {
 
 class UserProfileService {
   async requestEmailVerification(email: string): Promise<void> {
-    logger.info(`Requesting email verification for email: ${email}`);
+    logger.debug(`Requesting email verification for email: ${email}`);
     try {
       const user = await UserRepository.findByEmail(email);
       if (!user) {
@@ -33,13 +34,13 @@ class UserProfileService {
         verificationToken.token
       );
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async verifyEmail(token: string): Promise<User> {
+    logger.debug(`Verifying email with token: ${token}`);
     try {
-      logger.info(`Verifying email with token: ${token}`);
       const user = await UserRepository.findByToken(token, "emailVerification");
 
       if (!user) {
@@ -53,13 +54,13 @@ class UserProfileService {
       logger.info(`Email verified for user with ID: ${user.id}`);
       return user;
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async verifyEmailToken(token: string): Promise<User> {
+    logger.debug(`Verifying email with token: ${token}`);
     try {
-      logger.info(`Verifying email with token: ${token}`);
       const user = await UserRepository.findByToken(token, "emailVerification");
 
       if (!user) {
@@ -73,7 +74,7 @@ class UserProfileService {
       logger.info(`Email verified for user with ID: ${user.id}`);
       return user;
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
@@ -82,7 +83,7 @@ class UserProfileService {
     try {
       return await UserRepository.findByEmail(email);
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
@@ -93,7 +94,7 @@ class UserProfileService {
         attributes: ["id", "name", "email"],
       });
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
@@ -109,11 +110,12 @@ class UserProfileService {
         await TokenGenerationService.generatePasswordResetToken(user.id);
       await EmailService.sendResetPasswordEmail(user.email, resetToken.token);
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
+    logger.debug(`Resetting password with token: ${token}`);
     try {
       logger.info(`Resetting password with token: ${token}`);
       const userId = await TokenValidationService.validatePasswordResetToken(
@@ -125,24 +127,30 @@ class UserProfileService {
         throw new ValidationError("Invalid or expired reset token.");
       }
 
-      user.setDataValue("password", await bcrypt.hash(newPassword, 10));
+      user.setDataValue("password", await hashPassword(newPassword));
       await UserRepository.updateUserById(user.id, user);
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async getUserRoles(userId: number): Promise<string[]> {
-    const user = await UserRepository.findById(userId);
-    if (!user) throw new NotFoundError("User not found");
+    logger.debug(`Fetching roles for user with ID: ${userId}`);
+    try {
+      logger.info(`Fetching roles for user with ID: ${userId}`);
+      const user = await UserRepository.findById(userId);
+      if (!user) throw new NotFoundError("User not found");
 
-    return (await user.getRoles()).map((role) => role.name);
+      return (await user.getRoles()).map((role) => role.name);
+    } catch (err) {
+      throw err;
+    }
   }
 
   async createUser(params: CreateUserParams): Promise<User> {
+    logger.debug(`Creating user with email: ${params.email}`);
     try {
-      logger.info(`Creating user with email: ${params.email}`);
-      const hashedPassword = await bcrypt.hash(params.password, 10);
+      const hashedPassword = await hashPassword(params.password);
       const user = await UserRepository.createUser({
         name: params.name,
         email: params.email,
@@ -150,23 +158,22 @@ class UserProfileService {
         phone: params.phone,
       });
 
-      const verificationToken =
-        TokenGenerationService.generateEmailVerificationToken(user.id);
+      TokenGenerationService.generateEmailVerificationToken(user.id);
 
       logger.info(`User created with email: ${params.email}`);
 
       return user;
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 
   async getUserById(userId: number): Promise<User | null> {
+    logger.debug(`Fetching user by ID: ${userId}`);
     try {
-      logger.info(`Fetching user by ID: ${userId}`);
       return await UserRepository.findById(userId);
     } catch (err) {
-      throw new ServerError(err.message);
+      throw err;
     }
   }
 }
