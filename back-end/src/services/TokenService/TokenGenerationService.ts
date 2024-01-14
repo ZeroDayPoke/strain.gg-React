@@ -3,11 +3,10 @@
 import { Token } from "../../models";
 import crypto from "crypto";
 import TokenRepository from "../../repositories/TokenRepository";
-import { ServerError } from "../../errors";
 import { _signJwt, _calculateExpiry } from "./TokenUtilityService";
 import ENV from "../../utils/loadEnv";
 import { TokenUtilityService } from ".";
-import { logger } from "../../middleware";
+import logger from "../../middleware/logger";
 
 export enum TokenType {
   Access = "access",

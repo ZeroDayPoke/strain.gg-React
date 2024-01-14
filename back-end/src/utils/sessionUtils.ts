@@ -1,6 +1,6 @@
 // storeEssentialUserDataInSession.ts
 import logger from "../middleware/logger";
-import { RequestWithTokenAndSession } from "@zerodaypoke/strange-types";
+import { ExtendedRequest } from "@zerodaypoke/strange-types";
 
 /**
  * Stores essential user data in the session.
@@ -10,7 +10,7 @@ import { RequestWithTokenAndSession } from "@zerodaypoke/strange-types";
  * @param req - The request object that includes the session and decoded token.
  */
 export default function storeEssentialUserDataInSession(
-  req: RequestWithTokenAndSession
+  req: ExtendedRequest
 ): void {
   if (!req.session.data) {
     req.session.data = {

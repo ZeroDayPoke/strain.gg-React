@@ -76,6 +76,7 @@ describe("errorHandler Middleware", () => {
     expect(res.statusCode).toBe(500);
     expect(res._getJSONData()).toEqual({
       message: "Internal Server Error",
+      name: "UnknownError",
       statusCode: 500,
     });
   });

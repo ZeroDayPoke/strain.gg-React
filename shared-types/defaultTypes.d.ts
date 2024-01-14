@@ -32,6 +32,27 @@ declare module "express-session" {
   }
 }
 
+export interface ExtendedRequest extends Request {
+  headers: {
+    authorization?: string;
+  };
+  token?: string;
+  decodedToken?: DecodedToken;
+  session: session.Session & Partial<{ data: UserSessionData }>;
+}
+
+export type MiddlewareFunction = (
+  req: ExtendedRequest,
+  res: Response,
+  next: NextFunction
+) => Promise<void>;
+
+export interface RequestWithAuthHeader extends Request {
+  headers: {
+    authorization?: string;
+  };
+}
+
 export interface RequestWithDecodedToken extends Request {
   token: string;
   decodedToken: DecodedToken;

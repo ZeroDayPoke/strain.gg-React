@@ -17,7 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/jest": "^29.5.11",
-    "@zerodaypoke/strange-types": "^1.0.4",
+    "@zerodaypoke/strange-types": "^1.0.5",
     "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
     "connect-session-sequelize": "^7.1.7",

@@ -1,14 +1,15 @@
 // src/middleware/authenticate.ts
 import logger from "./logger";
+import { Response, NextFunction } from "express";
 import asyncErrorHandler from "./asyncErrorHandler";
 import { AuthenticationError } from "../errors";
 import {
-  MiddlewareFunctionWithTokenAndSession,
-  RequestWithTokenAndSession,
+  ExtendedRequest,
+  MiddlewareFunction,
 } from "@zerodaypoke/strange-types";
 
-const ensureAuthenticated: MiddlewareFunctionWithTokenAndSession =
-  asyncErrorHandler<RequestWithTokenAndSession>(async (req, res, next) => {
+const ensureAuthenticated: MiddlewareFunction = asyncErrorHandler(
+  async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     if (
       req.session &&
       req.session.data.userId &&
@@ -23,6 +24,7 @@ const ensureAuthenticated: MiddlewareFunctionWithTokenAndSession =
     logger.error(errorMsg);
 
     throw new AuthenticationError("Not authenticated");
-  });
+  }
+);
 
 export default ensureAuthenticated;

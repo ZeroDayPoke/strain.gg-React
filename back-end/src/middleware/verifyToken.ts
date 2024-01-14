@@ -1,17 +1,20 @@
 // src/middleware/verifyToken.ts
 import { TokenUtilityService } from "../services/TokenService";
+import { Response, NextFunction } from "express";
 import asyncErrorHandler from "./asyncErrorHandler";
 import logger from "./logger";
 import { AuthenticationError } from "../errors";
 import {
-  MiddlewareFunctionWithToken,
-  RequestWithDecodedToken,
+  ExtendedRequest,
+  MiddlewareFunction,
 } from "@zerodaypoke/strange-types";
 
-const verifyToken: MiddlewareFunctionWithToken =
-  asyncErrorHandler<RequestWithDecodedToken>(async (req, res, next) => {
+const verifyToken: MiddlewareFunction = asyncErrorHandler(
+  async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];
-    req.token = token;
+    if (!token) {
+      throw new AuthenticationError("Token is missing");
+    }
     logger.info(`Received token: ${token}`);
 
     try {
@@ -22,13 +25,11 @@ const verifyToken: MiddlewareFunctionWithToken =
     } catch (error) {
       logger.error(`Token verification failed: ${error.message}`);
       if (req.session) {
-        req.session.destroy((err) => {
-          if (err) logger.error(`Session destruction error: ${err}`);
-          else logger.info("Session destroyed");
-        });
+        req.session.destroy(() => logger.info("Session destroyed"));
       }
       throw new AuthenticationError("Invalid token");
     }
-  });
+  }
+);
 
 export default verifyToken;

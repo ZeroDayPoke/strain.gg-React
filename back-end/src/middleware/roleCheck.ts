@@ -4,21 +4,22 @@ import { TokenValidationService } from "../services/TokenService";
 import { Role, Token } from "../models";
 import logger from "./logger";
 import asyncErrorHandler from "./asyncErrorHandler";
+import { Response, NextFunction } from "express";
 import { AuthorizationError } from "../errors";
 import { UserProfileService } from "../services/UserService";
-import { TokenType } from "@zerodaypoke/strange-types";
+import { TokenType } from "../repositories/TokenRepository";
 import {
-  MiddlewareFunctionWithTokenAndSession,
-  RequestWithTokenAndSession,
+  ExtendedRequest,
+  MiddlewareFunction,
 } from "@zerodaypoke/strange-types";
 
-type RoleCheckHigherOrderFunction = (
+export type RoleCheckHigherOrderFunction = (
   requiredRole: string
-) => MiddlewareFunctionWithTokenAndSession;
+) => MiddlewareFunction;
 
-const requireRole: RoleCheckHigherOrderFunction = (requiredRole) => {
-  return asyncErrorHandler<RequestWithTokenAndSession>(
-    async (req, res, next) => {
+const requireRole: RoleCheckHigherOrderFunction = (requiredRole: string) => {
+  return asyncErrorHandler(
+    async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       logger.info(`Role Required: ${requiredRole}`);
       const token = req.headers.authorization?.split(" ")[1];
 

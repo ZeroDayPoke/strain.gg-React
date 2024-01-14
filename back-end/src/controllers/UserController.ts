@@ -12,12 +12,9 @@ import {
 import { Role, User } from "../models";
 import logger from "../middleware/logger";
 import { ServerError, ValidationError, AuthenticationError } from "../errors";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { validateUser } from "../validation";
-import {
-  RequestWithTokenAndSession,
-  UserResponse,
-} from "@zerodaypoke/strange-types";
+import { UserResponse, ExtendedRequest } from "@zerodaypoke/strange-types";
 
 const UserController = {
   signUp: async (req: Request, res: Response<UserResponse>): Promise<void> => {
@@ -85,10 +82,7 @@ const UserController = {
     }
   },
 
-  logOut: async (
-    req: RequestWithTokenAndSession,
-    res: Response
-  ): Promise<void> => {
+  logOut: async (req: ExtendedRequest, res: Response): Promise<void> => {
     logger.debug(`Logging out user with ID: ${req.session.data.userId}`);
     try {
       await TokenValidationService.invalidateOnLogout(req.session.data.userId);
@@ -107,7 +101,7 @@ const UserController = {
   },
 
   checkSession: async (
-    req: RequestWithTokenAndSession,
+    req: ExtendedRequest,
     res: Response<UserResponse>
   ): Promise<void> => {
     logger.debug(
@@ -129,10 +123,7 @@ const UserController = {
     }
   },
 
-  verify: async (
-    req: RequestWithTokenAndSession,
-    res: Response
-  ): Promise<void> => {
+  verify: async (req: ExtendedRequest, res: Response): Promise<void> => {
     logger.debug(`Verifying user with token: ${req.query.token}`);
     try {
       await UserProfileService.verifyEmailToken(req.query.token as string);
@@ -142,10 +133,7 @@ const UserController = {
     }
   },
 
-  getAllUsers: async (
-    req: RequestWithTokenAndSession,
-    res: Response
-  ): Promise<void> => {
+  getAllUsers: async (req: ExtendedRequest, res: Response): Promise<void> => {
     logger.debug("Getting all users");
     try {
       const users = await UserProfileService.getAllUsers();
@@ -156,7 +144,7 @@ const UserController = {
   },
 
   requestResetPassword: async (
-    req: RequestWithTokenAndSession,
+    req: ExtendedRequest,
     res: Response
   ): Promise<void> => {
     logger.debug(`Requesting password reset for: ${req.body.email}`);

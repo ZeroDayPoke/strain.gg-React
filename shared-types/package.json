@@ -1,6 +1,6 @@
 {
   "name": "@zerodaypoke/strange-types",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "shared types",
   "types": "index.d.ts",
   "scripts": {

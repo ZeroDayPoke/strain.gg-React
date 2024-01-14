@@ -10,6 +10,17 @@ import {
 } from "../errors";
 import logger from "./logger";
 
+/**
+ * Error handling middleware for Express applications.
+ * It logs the error and sends a formatted response based on the type of error.
+ * Known errors (NotFoundError, ValidationError, etc.) are handled explicitly,
+ * while other unknown errors default to a 500 Internal Server Error.
+ *
+ * @param {Error} err - The error object.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @param {NextFunction} next - The next middleware function in the stack.
+ */
 const errorHandler: ErrorRequestHandler = (
   err,
   req: Request,
