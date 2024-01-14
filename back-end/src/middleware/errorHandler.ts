@@ -1,4 +1,4 @@
-// ./middleware/errorHandler.ts
+// src/middleware/errorHandler.ts
 
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import {

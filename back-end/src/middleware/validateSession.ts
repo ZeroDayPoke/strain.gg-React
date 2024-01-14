@@ -10,6 +10,25 @@ import {
   MiddlewareFunction,
 } from "@zerodaypoke/strange-types";
 
+/**
+ * Middleware to validate user sessions. It checks if the session data corresponds
+ * to the user identified in the access token. This middleware ensures that the
+ * user's session is valid and the user is authenticated before they can access
+ * protected routes.
+ *
+ * The middleware performs the following checks:
+ * - Verifies that the session contains a user ID.
+ * - In non-production environments, it stores essential user data in the session.
+ * - In production environments, it throws an error if the session lacks a user ID.
+ * - Checks if the session user ID matches the user ID in the access token.
+ * - If there's a mismatch, it destroys the session and throws an authorization error.
+ *
+ * Usage:
+ * This middleware should be used in routes where authenticated user access is required.
+ *
+ * Example:
+ *   router.get('/protected-route', validateSession, (req, res) => { ... });
+ */
 const validateSession: MiddlewareFunction = asyncErrorHandler(
   async (
     req: ExtendedRequest,

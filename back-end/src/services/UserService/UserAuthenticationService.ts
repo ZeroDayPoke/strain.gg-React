@@ -6,11 +6,7 @@ import { TokenGenerationService } from "../TokenService";
 import UserProfileService from "./UserProfileService";
 import { User } from "../../models";
 import { NotFoundError, AuthenticationError } from "../../errors";
-
-interface AuthenticateParams {
-  email: string;
-  password: string;
-}
+import { AuthenticateParams } from "@zerodaypoke/strange-types";
 
 class UserAuthenticationService {
   async authenticate(

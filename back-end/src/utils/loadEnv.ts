@@ -1,27 +1,22 @@
-// ./utils/loadEnv.ts
-
+// src/utils/loadEnv.ts
+import { IEnv } from "@zerodaypoke/strange-types";
 import dotenv from "dotenv";
 
 const envFile = process.env.NODE_ENV === "test" ? ".test.env" : ".env";
 dotenv.config({ path: envFile });
 
-interface IEnv {
-  NODE_ENV: string;
-  DB_USER: string;
-  DB_PASS: string;
-  DB_NAME: string;
-  DB_HOST: string;
-  SESSION_SECRET: string;
-  PORT: number;
-  SALT_ROUNDS: number;
-  EMAIL_USERNAME: string;
-  EMAIL_PASSWORD: string;
-  JWT_SECRET: string;
-  ACCESS_TOKEN_EXPIRY: string;
-  EMAIL_VERIFICATION_TOKEN_EXPIRY: string;
-  PASSWORD_RESET_TOKEN_EXPIRY: string;
-}
-
+/**
+ * Utility to load and validate environment variables.
+ * Supports different environments like development, test, and production.
+ * Defaults are provided for development and test environments.
+ *
+ * Usage:
+ * Import ENV from this file to access environment variables throughout the application.
+ *
+ * Example:
+ *   import ENV from './loadEnv';
+ *   console.log(ENV.DB_USER); // Prints the database user.
+ */
 const ENV: IEnv = {
   NODE_ENV: process.env.NODE_ENV || "development",
   DB_USER: process.env.DB_USER || "cloud_user",

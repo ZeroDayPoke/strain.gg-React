@@ -3,6 +3,7 @@
 import nodemailer from "nodemailer";
 import ENV from "../utils/loadEnv";
 import logger from "../middleware/logger";
+import { MailOptions } from "@zerodaypoke/strange-types";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -11,13 +12,6 @@ const transporter = nodemailer.createTransport({
     pass: ENV.EMAIL_PASSWORD,
   },
 });
-
-interface MailOptions {
-  from: string;
-  to: string;
-  subject: string;
-  text: string;
-}
 
 class EmailService {
   static async sendEmail(mailOptions: MailOptions): Promise<void> {

@@ -9,6 +9,27 @@ import {
   MiddlewareFunction,
 } from "@zerodaypoke/strange-types";
 
+/**
+ * Middleware for verifying JWT tokens. This middleware extracts the JWT token
+ * from the authorization header, verifies it, and attaches the decoded token
+ * to the request object.
+ *
+ * It performs the following steps:
+ * - Extracts the JWT token from the 'Authorization' header.
+ * - If the token is not present, it throws an AuthenticationError.
+ * - Uses the TokenUtilityService to verify the JWT token.
+ * - If verification is successful, the decoded token is attached to the request
+ *   object under 'req.decodedToken'.
+ * - If verification fails, any existing session is destroyed, and an
+ *   AuthenticationError is thrown.
+ *
+ * Usage:
+ * This middleware should be used in routes where a valid JWT token is required
+ * to authenticate the user.
+ *
+ * Example:
+ *   router.get('/protected-route', verifyToken, (req, res) => { ... });
+ */
 const verifyToken: MiddlewareFunction = asyncErrorHandler(
   async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];

@@ -3,10 +3,7 @@ import db from "../config/database";
 import User from "./User";
 import Role from "./Role";
 import Token from "./Token";
-
-interface UserRoleAttributes {
-  id: number;
-}
+import { UserRoleAttributes } from "@zerodaypoke/strange-types";
 
 class UserRole extends Model<UserRoleAttributes> {
   declare id: number;

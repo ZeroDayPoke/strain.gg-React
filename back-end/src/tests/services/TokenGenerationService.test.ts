@@ -1,11 +1,8 @@
 import TokenRepository from "../../repositories/TokenRepository";
-import { TokenGenerationService } from "../../services/TokenService";
-
-export enum TokenType {
-  Access = "access",
-  EmailVerification = "email-verification",
-  PasswordReset = "password-reset",
-}
+import {
+  TokenGenerationService,
+  UserTokenType,
+} from "../../services/TokenService";
 
 jest.mock("../../repositories/TokenRepository", () => {
   const mockTokenInstance = {
@@ -49,7 +46,7 @@ describe("TokenGenerationService", () => {
       expect(mockedTokenRepository.createToken).toHaveBeenCalledWith({
         userId: mockUserId,
         token: expect.any(String),
-        type: TokenType.Access,
+        type: UserTokenType.Access,
         expiration: expect.any(Date),
       });
     });
@@ -64,7 +61,7 @@ describe("TokenGenerationService", () => {
       expect(mockedTokenRepository.createToken).toHaveBeenCalledWith({
         userId: mockUserId,
         token: expect.any(String),
-        type: TokenType.EmailVerification,
+        type: UserTokenType.EmailVerification,
         expiration: expect.any(Date),
       });
       expect(result.token).toBeDefined();
@@ -81,7 +78,7 @@ describe("TokenGenerationService", () => {
       expect(mockedTokenRepository.createToken).toHaveBeenCalledWith({
         userId: mockUserId,
         token: expect.any(String),
-        type: TokenType.PasswordReset,
+        type: UserTokenType.PasswordReset,
         expiration: expect.any(Date),
       });
       expect(result.token).toBeDefined();

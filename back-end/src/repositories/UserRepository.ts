@@ -1,23 +1,13 @@
 import { User, Role, Token } from "../models";
 import { Op } from "sequelize";
 import logger from "../middleware/logger";
-
-interface CreateParams {
-  name?: string;
-  email: string;
-  password: string;
-  phone?: string;
-  Roles?: Role[];
-}
+import { CreateUserParams } from "@zerodaypoke/strange-types";
 
 class UserRepository {
-  async createUser(userData: CreateParams): Promise<User> {
+  async createUser(userData: CreateUserParams): Promise<User> {
     logger.debug(`Creating user with params: ${JSON.stringify(userData)}`);
     try {
       const user = await User.create(userData);
-      if (userData.Roles) {
-        await user.addRoles(await user.getRoles());
-      }
       return user;
     } catch (err) {
       throw err;

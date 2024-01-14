@@ -1,4 +1,4 @@
-// ./middleware/checkAuthHeader.ts
+// src/middleware/checkAuthHeader.ts
 
 import { Response, NextFunction } from "express";
 import asyncErrorHandler from "./asyncErrorHandler";

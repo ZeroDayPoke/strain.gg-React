@@ -1,28 +1,17 @@
 // TokenGenerationService.ts
 
-import { Token } from "../../models";
 import crypto from "crypto";
-import TokenRepository from "../../repositories/TokenRepository";
+import { TokenRepository } from "../../repositories/index";
 import { _signJwt, _calculateExpiry } from "./TokenUtilityService";
 import ENV from "../../utils/loadEnv";
-import { TokenUtilityService } from ".";
 import logger from "../../middleware/logger";
-
-export enum TokenType {
-  Access = "access",
-  EmailVerification = "email-verification",
-  PasswordReset = "password-reset",
-}
-
-export interface TokenPayload {
-  userId: number;
-  roles: string[];
-}
+import { UserTokenType } from ".";
+import { Token } from "../../models";
 
 class TokenGenerationService {
   static async _generateToken(
     userId: number,
-    tokenType: TokenType,
+    tokenType: UserTokenType,
     expiryTime: string
   ): Promise<Token> {
     logger.debug(`Generating ${tokenType} token for user with ID: ${userId}`);
@@ -32,7 +21,7 @@ class TokenGenerationService {
         userId,
         token,
         type: tokenType,
-        expiration: TokenUtilityService._calculateExpiry(expiryTime),
+        expiration: _calculateExpiry(expiryTime),
       });
     } catch (err) {
       throw err;
@@ -41,7 +30,7 @@ class TokenGenerationService {
 
   private static async manageExistingTokens(
     userId: number,
-    tokenType: TokenType
+    tokenType: UserTokenType
   ): Promise<Token | null> {
     logger.debug(`Managing existing tokens for user with ID: ${userId}`);
     try {
@@ -73,20 +62,15 @@ class TokenGenerationService {
     try {
       const existingToken = await this.manageExistingTokens(
         userId,
-        TokenType.EmailVerification
+        UserTokenType.EmailVerification
       );
       if (existingToken) return existingToken;
 
       const token = await TokenRepository.createToken({
         userId,
-        token: TokenUtilityService._signJwt(
-          { userId },
-          ENV.EMAIL_VERIFICATION_TOKEN_EXPIRY
-        ),
-        type: TokenType.EmailVerification,
-        expiration: TokenUtilityService._calculateExpiry(
-          ENV.EMAIL_VERIFICATION_TOKEN_EXPIRY
-        ),
+        token: _signJwt({ userId }, ENV.EMAIL_VERIFICATION_TOKEN_EXPIRY),
+        type: UserTokenType.EmailVerification,
+        expiration: _calculateExpiry(ENV.EMAIL_VERIFICATION_TOKEN_EXPIRY),
       });
       return token;
     } catch (err) {
@@ -99,20 +83,15 @@ class TokenGenerationService {
     try {
       const existingToken = await this.manageExistingTokens(
         userId,
-        TokenType.PasswordReset
+        UserTokenType.PasswordReset
       );
       if (existingToken) return existingToken;
 
       const token = await TokenRepository.createToken({
         userId,
-        token: TokenUtilityService._signJwt(
-          { userId },
-          ENV.PASSWORD_RESET_TOKEN_EXPIRY
-        ),
-        type: TokenType.PasswordReset,
-        expiration: TokenUtilityService._calculateExpiry(
-          ENV.PASSWORD_RESET_TOKEN_EXPIRY
-        ),
+        token: _signJwt({ userId }, ENV.PASSWORD_RESET_TOKEN_EXPIRY),
+        type: UserTokenType.PasswordReset,
+        expiration: _calculateExpiry(ENV.PASSWORD_RESET_TOKEN_EXPIRY),
       });
       return token;
     } catch (err) {
@@ -128,19 +107,14 @@ class TokenGenerationService {
     try {
       const existingToken = await this.manageExistingTokens(
         userId,
-        TokenType.Access
+        UserTokenType.Access
       );
       if (existingToken) return existingToken.token;
       const token = await TokenRepository.createToken({
         userId,
-        token: TokenUtilityService._signJwt(
-          { userId, roles },
-          ENV.ACCESS_TOKEN_EXPIRY
-        ),
-        type: TokenType.Access,
-        expiration: TokenUtilityService._calculateExpiry(
-          ENV.ACCESS_TOKEN_EXPIRY
-        ),
+        token: _signJwt({ userId, roles }, ENV.ACCESS_TOKEN_EXPIRY),
+        type: UserTokenType.Access,
+        expiration: _calculateExpiry(ENV.ACCESS_TOKEN_EXPIRY),
       });
       return token.token;
     } catch (err) {

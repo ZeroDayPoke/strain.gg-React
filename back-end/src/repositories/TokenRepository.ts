@@ -1,14 +1,10 @@
-import { Token } from "../models";
+// src/repositories/TokenRepository.ts
 import { Op } from "sequelize";
+import { UserTokenType } from "../services/TokenService";
 import ms from "ms";
 import logger from "../middleware/logger";
 import { ValidationError } from "../errors";
-
-export enum TokenType {
-  Access = "access",
-  EmailVerification = "email-verification",
-  PasswordReset = "password-reset",
-}
+import { Token } from "../models";
 
 class TokenRepository {
   async createToken(tokenData: {
@@ -31,7 +27,7 @@ class TokenRepository {
     isValid = true,
   }: {
     token: string;
-    type: TokenType;
+    type: UserTokenType;
     isValid?: boolean;
   }): Promise<Token | null> {
     logger.debug(`Finding token: ${token}`);
@@ -59,7 +55,7 @@ class TokenRepository {
     }
   }
 
-  async getUserTokens(userId: number, type?: TokenType): Promise<Token[]> {
+  async getUserTokens(userId: number, type?: UserTokenType): Promise<Token[]> {
     logger.debug(`Getting tokens for user with ID: ${userId}`);
     try {
       const whereConditions = type ? { userId, type } : { userId };
@@ -76,7 +72,7 @@ class TokenRepository {
     try {
       const existingToken = await this.findTokenByString({
         token: token,
-        type: TokenType.Access,
+        type: UserTokenType.Access,
         isValid: true,
       });
 

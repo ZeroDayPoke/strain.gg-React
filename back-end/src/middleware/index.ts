@@ -1,4 +1,4 @@
-// ./middleware/index.ts
+// src/middleware/index.ts
 
 import errorHandler from "./errorHandler";
 import asyncErrorHandler from "./asyncErrorHandler";

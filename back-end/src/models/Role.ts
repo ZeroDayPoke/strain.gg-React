@@ -1,10 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../config/database";
-
-export interface RoleAttributes {
-  id: number;
-  name: string;
-}
+import { RoleAttributes } from "@zerodaypoke/strange-types";
 
 class Role extends Model<RoleAttributes> {
   declare id: number;

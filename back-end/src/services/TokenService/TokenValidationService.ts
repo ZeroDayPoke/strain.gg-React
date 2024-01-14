@@ -1,19 +1,9 @@
 // TokenValidationService.ts
-import TokenRepository from "../../repositories/TokenRepository";
+import { TokenRepository } from "../../repositories";
 import { ValidationError } from "../../errors";
 import logger from "../../middleware/logger";
 import { _signJwt, _calculateExpiry } from "./TokenUtilityService";
-
-export enum TokenType {
-  Access = "access",
-  EmailVerification = "email-verification",
-  PasswordReset = "password-reset",
-}
-
-export interface TokenPayload {
-  userId: number;
-  roles: string[];
-}
+import { UserTokenType } from ".";
 
 class TokenValidationService {
   static async invalidateOnLogout(userId: number): Promise<void> {
@@ -21,7 +11,7 @@ class TokenValidationService {
     try {
       const tokenData = await TokenRepository.getUserTokens(
         userId,
-        TokenType.Access
+        UserTokenType.Access
       );
 
       if (tokenData) {
@@ -36,7 +26,7 @@ class TokenValidationService {
 
   static async _validateToken(
     token: string,
-    tokenType: TokenType
+    tokenType: UserTokenType
   ): Promise<number> {
     logger.debug(`Validating ${tokenType} token`);
     try {
@@ -57,11 +47,11 @@ class TokenValidationService {
   }
 
   static async validateEmailVerificationToken(token: string): Promise<number> {
-    return this._validateToken(token, TokenType.EmailVerification);
+    return this._validateToken(token, UserTokenType.EmailVerification);
   }
 
   static async validatePasswordResetToken(token: string): Promise<number> {
-    return this._validateToken(token, TokenType.PasswordReset);
+    return this._validateToken(token, UserTokenType.PasswordReset);
   }
 }
 

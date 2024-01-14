@@ -1,5 +1,5 @@
 // UserProfileService.ts
-import UserRepository from "../../repositories/UserRepository";
+import { UserRepository } from "../../repositories";
 import { hashPassword } from "./UserUtilityService";
 import { User } from "../../models/index";
 import logger from "../../middleware/logger";
@@ -8,15 +8,8 @@ import {
   TokenValidationService,
 } from "../TokenService";
 import EmailService from "../EmailService";
-import bcrypt from "bcrypt";
-import { ServerError, NotFoundError, ValidationError } from "../../errors";
-
-interface CreateUserParams {
-  name?: string;
-  email: string;
-  password: string;
-  phone?: string;
-}
+import { NotFoundError, ValidationError } from "../../errors";
+import { CreateUserParams } from "@zerodaypoke/strange-types";
 
 class UserProfileService {
   async requestEmailVerification(email: string): Promise<void> {

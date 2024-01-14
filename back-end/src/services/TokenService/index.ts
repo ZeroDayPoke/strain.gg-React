@@ -4,7 +4,7 @@ import TokenValidationService from "./TokenValidationService";
 import TokenRefreshService from "./TokenRefreshService";
 import * as TokenUtilityService from "./TokenUtilityService";
 
-export enum TokenType {
+export enum UserTokenType {
   Access = "access",
   EmailVerification = "email-verification",
   PasswordReset = "password-reset",

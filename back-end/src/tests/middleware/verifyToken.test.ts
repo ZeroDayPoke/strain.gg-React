@@ -4,12 +4,6 @@ import { AuthenticationError } from "../../errors";
 import { TokenUtilityService } from "../../services/TokenService";
 import verifyToken from "../../middleware/verifyToken";
 
-export enum TokenType {
-  Access = "access",
-  EmailVerification = "email-verification",
-  PasswordReset = "password-reset",
-}
-
 jest.mock("jsonwebtoken", () => ({
   sign: jest.fn(),
   verify: jest.fn(),

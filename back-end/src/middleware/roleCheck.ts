@@ -1,22 +1,38 @@
-// ./middleware/roleCheck.ts
-
-import { TokenValidationService } from "../services/TokenService";
-import { Role, Token } from "../models";
+// src/middleware/roleCheck.ts
+import {
+  ExtendedRequest,
+  RoleCheckHigherOrderFunction,
+} from "@zerodaypoke/strange-types";
+import {
+  TokenValidationService,
+  UserTokenType,
+} from "../services/TokenService/index";
+import { Role } from "../models/index";
 import logger from "./logger";
 import asyncErrorHandler from "./asyncErrorHandler";
 import { Response, NextFunction } from "express";
 import { AuthorizationError } from "../errors";
 import { UserProfileService } from "../services/UserService";
-import { TokenType } from "../repositories/TokenRepository";
-import {
-  ExtendedRequest,
-  MiddlewareFunction,
-} from "@zerodaypoke/strange-types";
 
-export type RoleCheckHigherOrderFunction = (
-  requiredRole: string
-) => MiddlewareFunction;
-
+/**
+ * Middleware for role-based access control. This middleware ensures that a user has the required role
+ * to access a specific route. It performs the following checks:
+ *
+ * - Extracts the JWT token from the 'Authorization' header.
+ * - Validates the token and retrieves the user ID from the decoded token.
+ * - Fetches the user's roles using the UserProfileService.
+ * - Checks if the user has the required role.
+ * - If the user does not have the required role, throws an AuthorizationError.
+ *
+ * Usage:
+ * This middleware should be used in routes where access is restricted based on user roles.
+ * It can be used as a higher-order function that takes the required role as a parameter and
+ * returns a middleware function.
+ *
+ * Example:
+ *   router.use(requireRole("Admin"));
+ *   router.get("/admin-only-route", (req, res) => { ... });
+ */
 const requireRole: RoleCheckHigherOrderFunction = (requiredRole: string) => {
   return asyncErrorHandler(
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
@@ -29,7 +45,7 @@ const requireRole: RoleCheckHigherOrderFunction = (requiredRole: string) => {
 
       const decodedTokenUserId = await TokenValidationService._validateToken(
         token,
-        TokenType.Access
+        UserTokenType.Access
       );
 
       if (!decodedTokenUserId) {

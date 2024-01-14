@@ -1,94 +1,17 @@
-// ./src/types/defaultTypes.tsx
-import { NextFunction, Request, Response } from "express";
-import session from "express-session";
+/**
+ * defaultTypes.d.ts
+ */
 
-export enum TokenType {
-  Access = "access",
-  EmailVerification = "email-verification",
-  PasswordReset = "password-reset",
+/**
+ * Represents rate limit options for the rate limiter middleware.
+ * @interface
+ * @property windowMs - The time window in milliseconds
+ * @property max - The maximum number of requests per IP address within the time window
+ */
+export interface RateLimitOptions {
+  windowMs: number; // The time window in milliseconds
+  max: number; // The maximum number of requests per IP address within the time window
 }
-
-interface TokenAttributes {
-  id: number;
-  userId: number;
-  token: string;
-  type: string;
-  expiration: Date;
-}
-
-export interface DecodedToken {
-  userId: number;
-  roles: string[];
-}
-
-export interface UserSessionData {
-  userId: number;
-  roles: string[];
-}
-
-declare module "express-session" {
-  interface Session {
-    data: UserSessionData;
-  }
-}
-
-export interface ExtendedRequest extends Request {
-  headers: {
-    authorization?: string;
-  };
-  token?: string;
-  decodedToken?: DecodedToken;
-  session: session.Session & Partial<{ data: UserSessionData }>;
-}
-
-export type MiddlewareFunction = (
-  req: ExtendedRequest,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
-
-export interface RequestWithAuthHeader extends Request {
-  headers: {
-    authorization?: string;
-  };
-}
-
-export interface RequestWithDecodedToken extends Request {
-  token: string;
-  decodedToken: DecodedToken;
-}
-
-export interface RequestWithSessionData extends Request {
-  session: session.Session & Partial<{ data: UserSessionData }>;
-}
-
-export interface RequestWithTokenAndSession extends Request {
-  token: string;
-  decodedToken: DecodedToken;
-  session: session.Session & Partial<{ data: UserSessionData }>;
-}
-
-export type MiddlewareFunctionWithToken = (
-  req: RequestWithDecodedToken,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
-export type MiddlewareFunctionWithSession = (
-  req: RequestWithSessionData,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
-export type MiddlewareFunctionWithTokenAndSession = (
-  req: RequestWithTokenAndSession,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
-
-type AsyncMiddlewareFunction<T extends Request> = (
-  req: T,
-  res: Response,
-  next: NextFunction
-) => Promise<void>;
 
 export interface NavBarItem {
   name: string;
@@ -100,4 +23,11 @@ export interface NavBarItem {
 
 export interface NavBarProps {
   items: NavBarItem[];
+}
+
+export interface MailOptions {
+  from: string;
+  to: string;
+  subject: string;
+  text: string;
 }
