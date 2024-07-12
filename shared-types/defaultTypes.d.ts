@@ -26,8 +26,8 @@ export interface NavBarProps {
 }
 
 export interface MailOptions {
-  from: string;
-  to: string;
-  subject: string;
-  text: string;
+  emailFrom: string;
+  emailTo: string;
+  emailSubject: string;
+  emailText: string;
 }
